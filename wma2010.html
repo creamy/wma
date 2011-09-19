@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head>
+<title>wma calc</title>
+</head>
+
+<body>
+<p><strong>Calculate Your Age Grade</strong></p>
+<table border="0" cellspacing="0" cellpadding="3">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="3">
+<tr><td>Sex</td><td><select id="sex"><option>male</option><option>female</option></select></td></tr>
+<tr><td>Age</td><td><input type="text" id="age" value="" size="8" /></td></tr>
+<tr><td>Distance</td><td><select id="race">
+<option value="t1">1500 m</option>
+<option value="t2">1 Mile</option>
+<option value="t3">2000 m</option>
+<option value="t4">3000 m</option>
+<option value="t5">2 Miles</option>
+<option value="t6">4000 m</option>
+<option value="t7">3 Miles</option>
+<option value="t8">5000 m</option>
+<option value="c1">5 km</option>
+<option value="t9">6000 m</option>
+<option value="c2">6 km</option>
+<option value="c3">4 Miles</option>
+<option value="t10">8000 m</option>
+<option value="c4">8 km</option>
+<option value="c5">5 Miles</option>
+<option value="t13">10000 m</option>
+<option value="c6">10 km</option>
+<option value="c7">12 km</option>
+<option value="c8">15 km</option>
+<option value="c9">10 Miles</option>
+<option value="c10">20 km</option>
+<option value="c11">1/2 Marathon</option>
+<option value="c12">25 km</option>
+<option value="c13">30 km</option>
+<option value="c14">Marathon</option>
+<option value="c15">50 km</option>
+<option value="c16">50 Miles</option>
+<option value="c17">100 km</option>
+<option value="c18">150 km</option>
+<option value="c19">100 Miles</option>
+<option value="c20">200 km</option>
+</select></td></tr>
+<tr><td>Time</td><td><input type="text" id="time" value="" size="8" /> example: 1:15:43</td></tr>
+<tr><td>&nbsp;</td><td><button id="b1" onclick="docalc();">Calculate</button></td></tr>
+</table>
+</td>
+<td width="400" style="background-color:#ffffcc;padding:10px;">
+<div id="res"></div>
+&nbsp;
+</td>
+</tr>
+</table>
+
+
+<script type="text/javascript">
+
+function docalc() {
+	var sex = document.getElementById('sex');
+	var sel_sex = sex.options[sex.selectedIndex].value;
+	var distance = document.getElementById('race');
+	var sel_distance = distance.options[distance.selectedIndex].value;
+	var time_elem = document.getElementById('time');
+	var time_str = time_elem.value;
+	var pcs = time_str.split(':');
+	var second_time = 0;
+	if (pcs.length==3) {
+		second_time = pcs[0]*60*60 + pcs[1]*60 + pcs[2]*1;
+	} else {
+		second_time = pcs[0]*60 + pcs[1]*1;
+	}
+	var age = document.getElementById('age');
+	var sel_age = age.value;
+	getData(sel_sex,sel_age,sel_distance,second_time);
+
+}
+
+function processData(JSONData,sel_key,time) {
+
+	var res = document.getElementById('res');
+	var result = '';
+	for (var key in JSONData) {
+	    if (JSONData.hasOwnProperty(key)) {
+		if (key==sel_key) {
+			result = JSONData[key];
+		}
+	    }
+	}
+
+	wma = roundNumber(result/time*100,2);
+
+
+	print_result = '<p>Actual Time: ' + time + ' seconds.</p><p>Age/Sex Avg: ' + result + ' seconds.</p><p>Age Grade: <strong>'+wma+'%</strong></p>';
+
+	res.innerHTML = print_result;
+}
+
+function roundNumber(num, dec) {
+	var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
+	return result;
+}
+function getData(sex,age,key,time) {
+var xmlhttp;
+if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+  xmlhttp=new XMLHttpRequest();
+  }
+else
+  {// code for IE6, IE5
+  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+xmlhttp.onreadystatechange=function()
+  {
+	if (xmlhttp.readyState==4 && xmlhttp.status==200)
+	    {
+	var ns = xmlhttp.responseText;
+	JSONData = JSON.parse(ns);
+    	processData(JSONData,key,time);
+	    }
+  }
+
+
+xmlhttp.open("POST","/cache.php",true);
+xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+xmlhttp.send("age="+age+"&key="+key+"&sex="+sex);
+xmlhttp.send();
+
+xmlhttp.send();
+
+}
+
+
+</script>
+</body>
+</html>
